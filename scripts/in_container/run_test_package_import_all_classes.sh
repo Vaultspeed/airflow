@@ -18,20 +18,31 @@
 # shellcheck source=scripts/in_container/_in_container_script_init.sh
 . "$( dirname "${BASH_SOURCE[0]}" )/_in_container_script_init.sh"
 
+setup_provider_packages
+
 echo
 echo "Testing if all classes in import packages can be imported"
 echo
 
 OUT_FILE_PRINTED_ON_ERROR=$(mktemp)
 
-if [[ ! ${INSTALL_AIRFLOW_VERSION:=""} =~ 1.10* ]]; then
+if [[ ${INSTALL_AIRFLOW_VERSION:=""} == "wheel"  ]]; then
+    echo
+    echo "Installing the airflow prepared from wheels"
+    echo
+    pip uninstall -y apache-airflow
+    pip install /dist/apache_airflow-*.whl
+    # Need to add excluded apache. All the rest should be installed by extras
+    pip install apache-beam[gcp]
+    echo
+elif [[ ! ${INSTALL_AIRFLOW_VERSION:=""} =~ ^1\.10\..* ]]; then
     echo
     echo "ERROR! You can only install providers package in 1.10. airflow series."
     echo "You have: ${INSTALL_AIRFLOW_VERSION}"
     echo "Set INSTALL_AIRFLOW_VERSION variable to the version you want to install before running!"
     exit 1
 else
-    pushd /airflow_sources || exit
+    pushd /airflow_sources > /dev/null || exit
     echo
     echo "Installing remaining packages from 'all' extras"
     echo
@@ -40,7 +51,7 @@ else
     echo "Uninstalling airflow after that"
     echo
     pip uninstall -y apache-airflow >>"${OUT_FILE_PRINTED_ON_ERROR}"  2>&1
-    popd || exit
+    popd >/dev/null || exit
     echo
     echo "Install airflow from PyPI - ${INSTALL_AIRFLOW_VERSION}"
     echo
@@ -48,12 +59,18 @@ else
 fi
 
 echo
-echo  Installing all packages at once in Airflow 1.10
+echo  "Installing all packages at once for Airflow ${INSTALL_AIRFLOW_VERSION}"
 echo
 
-# Install all packages at once
-pip install /dist/apache_airflow_backport_providers_*.whl >>"${OUT_FILE_PRINTED_ON_ERROR}" 2>&1
+EXTRA_FLAGS=""
 
+if [[ ${BACKPORT_PACKAGES} != "true" ]]; then
+    # Install providers without deps as we do not have yet airflow 2.0 released
+    EXTRA_FLAGS="--no-deps"
+fi
+
+# Install all packages at once
+pip install ${EXTRA_FLAGS} /dist/apache_airflow*providers_*.whl >>"${OUT_FILE_PRINTED_ON_ERROR}" 2>&1
 
 echo > "${OUT_FILE_PRINTED_ON_ERROR}"
 
@@ -61,4 +78,30 @@ echo
 echo  Importing all classes in Airflow 1.10
 echo
 
-python3 /import_all_provider_classes.py
+# We have to move to a directory where "airflow
+unset PYTHONPATH
+# We need to make sure we are not in the airflow checkout, otherwise it will automatically be added to the
+# import path
+cd /
+
+declare -a IMPORT_CLASS_PARAMETERS
+
+PROVIDER_PATHS=$(python3 <<EOF 2>/dev/null
+import airflow.providers;
+path=airflow.providers.__path__
+for p in path._path:
+    print(p)
+EOF
+)
+export PROVIDER_PATHS
+
+echo "Searching for providers packages in:"
+echo "${PROVIDER_PATHS}"
+
+
+while read -r provider_path
+do
+    IMPORT_CLASS_PARAMETERS+=("--path" "${provider_path}")
+done < <(echo "${PROVIDER_PATHS}")
+
+python3 /opt/airflow/dev/import_all_classes.py "${IMPORT_CLASS_PARAMETERS[@]}"

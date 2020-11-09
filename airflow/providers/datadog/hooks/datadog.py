@@ -51,15 +51,13 @@ class DatadogHook(BaseHook, LoggingMixin):
         self.host = conn.host
 
         if self.api_key is None:
-            raise AirflowException("api_key must be specified in the " "Datadog connection details")
+            raise AirflowException("api_key must be specified in the Datadog connection details")
 
         self.log.info("Setting up api keys for Datadog")
         initialize(api_key=self.api_key, app_key=self.app_key)
 
     def validate_response(self, response: Dict[str, Any]) -> None:
-        """
-        Validate Datadog response
-        """
+        """Validate Datadog response"""
         if response['status'] != 'ok':
             self.log.error("Datadog returned: %s", response)
             raise AirflowException("Error status received from Datadog")

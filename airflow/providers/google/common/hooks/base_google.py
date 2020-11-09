@@ -16,15 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""
-This module contains a Google Cloud API base hook.
-"""
+"""This module contains a Google Cloud API base hook."""
 import functools
 import json
 import logging
 import os
 import tempfile
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from subprocess import check_output
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple, TypeVar, Union, cast
 
@@ -36,7 +34,7 @@ import tenacity
 from google.api_core.exceptions import Forbidden, ResourceExhausted, TooManyRequests
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.auth import _cloud_sdk
-from google.auth.environment_vars import CREDENTIALS
+from google.auth.environment_vars import CLOUD_SDK_CONFIG_DIR, CREDENTIALS
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload, build_http, set_user_agent
 
@@ -86,7 +84,7 @@ def is_soft_quota_exception(exception: Exception):
     return False
 
 
-def is_operation_in_progress_exception(exception: Exception):
+def is_operation_in_progress_exception(exception: Exception) -> bool:
     """
     Some of the calls return 429 (too many requests!) or 409 errors (Conflict)
     in case of operation in progress.
@@ -172,9 +170,7 @@ class GoogleBaseHook(BaseHook):
         self._cached_project_id: Optional[str] = None
 
     def _get_credentials_and_project_id(self) -> Tuple[google.auth.credentials.Credentials, Optional[str]]:
-        """
-        Returns the Credentials object for Google API and the associated project_id
-        """
+        """Returns the Credentials object for Google API and the associated project_id"""
         if self._cached_credentials is not None:
             return self._cached_credentials, self._cached_project_id
 
@@ -208,16 +204,12 @@ class GoogleBaseHook(BaseHook):
         return credentials, project_id
 
     def _get_credentials(self) -> google.auth.credentials.Credentials:
-        """
-        Returns the Credentials object for Google API
-        """
+        """Returns the Credentials object for Google API"""
         credentials, _ = self._get_credentials_and_project_id()
         return credentials
 
     def _get_access_token(self) -> str:
-        """
-        Returns a valid access token from Google API Credentials
-        """
+        """Returns a valid access token from Google API Credentials"""
         return self._get_credentials().token
 
     def _authorize(self) -> google_auth_httplib2.AuthorizedHttp:
@@ -238,7 +230,7 @@ class GoogleBaseHook(BaseHook):
         to the hook page, which allow admins to specify service_account,
         key_path, etc. They get formatted as shown below.
         """
-        long_f = 'extra__google_cloud_platform__{}'.format(f)
+        long_f = f'extra__google_cloud_platform__{f}'
         if hasattr(self, 'extras') and long_f in self.extras:
             return self.extras[long_f]
         else:
@@ -358,7 +350,7 @@ class GoogleBaseHook(BaseHook):
         def inner_wrapper(self: GoogleBaseHook, *args, **kwargs) -> RT:
             if args:
                 raise AirflowException(
-                    "You must use keyword arguments in this methods rather than" " positional"
+                    "You must use keyword arguments in this methods rather than positional"
                 )
             if 'project_id' in kwargs:
                 kwargs['project_id'] = kwargs['project_id'] or self.project_id
@@ -440,12 +432,11 @@ class GoogleBaseHook(BaseHook):
         credentials_path = _cloud_sdk.get_application_default_credentials_path()
         project_id = self.project_id
 
-        # fmt: off
-        with self.provide_gcp_credential_file_as_context(), \
-                tempfile.TemporaryDirectory() as gcloud_config_tmp, \
-                patch_environ({'CLOUDSDK_CONFIG': gcloud_config_tmp}):
+        with ExitStack() as exit_stack:
+            exit_stack.enter_context(self.provide_gcp_credential_file_as_context())
+            gcloud_config_tmp = exit_stack.enter_context(tempfile.TemporaryDirectory())
+            exit_stack.enter_context(patch_environ({CLOUD_SDK_CONFIG_DIR: gcloud_config_tmp}))
 
-            # fmt: on
             if project_id:
                 # Don't display stdout/stderr for security reason
                 check_output(["gcloud", "config", "set", "core/project", project_id])
@@ -453,7 +444,12 @@ class GoogleBaseHook(BaseHook):
                 # This solves most cases when we are logged in using the service key in Airflow.
                 # Don't display stdout/stderr for security reason
                 check_output(
-                    ["gcloud", "auth", "activate-service-account", f"--key-file={os.environ[CREDENTIALS]}",]
+                    [
+                        "gcloud",
+                        "auth",
+                        "activate-service-account",
+                        f"--key-file={os.environ[CREDENTIALS]}",
+                    ]
                 )
             elif os.path.exists(credentials_path):
                 # If we are logged in by `gcloud auth application-default` then we need to log in manually.
@@ -479,7 +475,7 @@ class GoogleBaseHook(BaseHook):
             yield
 
     @staticmethod
-    def download_content_from_request(file_handle, request, chunk_size):
+    def download_content_from_request(file_handle, request: dict, chunk_size: int) -> None:
         """
         Download media resources.
         Note that  the Python file object is compatible with io.Base and can be used with this class also.

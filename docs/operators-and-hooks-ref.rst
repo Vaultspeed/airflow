@@ -73,7 +73,7 @@ Fundamentals
    * - :mod:`airflow.operators.generic_transfer`
      -
 
-   * - :mod:`airflow.operators.latest_only_operator`
+   * - :mod:`airflow.operators.latest_only`
      -
 
    * - :mod:`airflow.operators.python`
@@ -371,10 +371,20 @@ These integrations allow you to copy data from/to Microsoft Azure.
      - Guide
      - Operator
 
+   * - `Azure Blob Storage <https://azure.microsoft.com/en-us/services/storage/blobs/>`__
+     - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
+     - :doc:`How to use <howto/operator/microsoft/transfer/blob_storage_to_gcs>`
+     - :mod:`airflow.providers.microsoft.azure.transfers.azure_blob_to_gcs`
+
    * - `Azure Data Lake Storage <https://azure.microsoft.com/en-us/services/storage/data-lake-storage/>`__
      - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
      -
      - :mod:`airflow.providers.google.cloud.transfers.adls_to_gcs`
+
+   * - Local
+     - `Azure Data Lake Storage <https://azure.microsoft.com/en-us/services/storage/data-lake-storage/>`__
+     - :doc:`How to use <howto/operator/microsoft/transfer/local_to_adls>`
+     - :mod:`airflow.providers.microsoft.azure.transfers.local_to_adls`
 
    * - Local
      - `Azure Blob Storage <https://azure.microsoft.com/en-us/services/storage/blobs/>`__
@@ -423,6 +433,12 @@ These integrations allow you to perform various operations within the Amazon Web
      - :mod:`airflow.providers.amazon.aws.operators.datasync`
      -
 
+   * - `Amazon Glacier <https://aws.amazon.com/glacier/>`__
+     - :doc:`How to use <howto/operator/amazon/aws/glacier>`
+     - :mod:`airflow.providers.amazon.aws.hooks.glacier`
+     - :mod:`airflow.providers.amazon.aws.sensors.glacier`
+     - :mod:`airflow.providers.amazon.aws.operators.glacier`
+
    * - `AWS Glue Catalog <https://aws.amazon.com/glue/>`__
      -
      - :mod:`airflow.providers.amazon.aws.hooks.glue_catalog`
@@ -461,7 +477,7 @@ These integrations allow you to perform various operations within the Amazon Web
 
    * - `Amazon DynamoDB <https://aws.amazon.com/dynamodb/>`__
      -
-     - :mod:`airflow.providers.amazon.aws.hooks.aws_dynamodb`
+     - :mod:`airflow.providers.amazon.aws.hooks.dynamodb`
      -
      -
 
@@ -476,6 +492,12 @@ These integrations allow you to perform various operations within the Amazon Web
      - :doc:`How to use <howto/operator/amazon/aws/ecs>`
      -
      - :mod:`airflow.providers.amazon.aws.operators.ecs`
+     -
+
+   * - `Amazon ElastiCache <https://aws.amazon.com/elasticache/redis//>`__
+     -
+     - :mod:`airflow.providers.amazon.aws.hooks.elasticache_replication_group`
+     -
      -
 
    * - `Amazon EMR <https://aws.amazon.com/emr/>`__
@@ -517,6 +539,12 @@ These integrations allow you to perform various operations within the Amazon Web
        :mod:`airflow.providers.amazon.aws.sensors.sagemaker_training`,
        :mod:`airflow.providers.amazon.aws.sensors.sagemaker_transform`,
        :mod:`airflow.providers.amazon.aws.sensors.sagemaker_tuning`
+
+   * - `Amazon SecretsManager <https://https://aws.amazon.com/secrets-manager/>`__
+     -
+     - :mod:`airflow.providers.amazon.aws.hooks.secrets_manager`
+     -
+     -
 
    * - `Amazon Simple Email Service (SES) <https://aws.amazon.com/ses/>`__
      -
@@ -598,7 +626,7 @@ These integrations allow you to copy data from/to Amazon Web Services.
 
    * - `Amazon Simple Storage Service (S3) <https://aws.amazon.com/s3/>`_
      - `Snowflake <https://snowflake.com/>`__
-     -
+     - :doc:`How to use <howto/operator/snowflake>`
      - :mod:`airflow.providers.snowflake.transfers.s3_to_snowflake`
 
    * - `Amazon Simple Storage Service (S3) <https://aws.amazon.com/s3/>`_
@@ -817,8 +845,14 @@ These integrations allow you to perform various operations within the Google Clo
      - :mod:`airflow.providers.google.cloud.operators.mlengine`
      -
 
-   * - `Cloud Memorystore <https://cloud.google.com/memorystore/>`__
+   * - `Cloud Memorystore Redis <https://cloud.google.com/memorystore/>`__
      - :doc:`How to use <howto/operator/google/cloud/cloud_memorystore>`
+     - :mod:`airflow.providers.google.cloud.hooks.cloud_memorystore`
+     - :mod:`airflow.providers.google.cloud.operators.cloud_memorystore`
+     -
+
+   * - `Cloud Memorystore Memcached <https://cloud.google.com/memorystore/>`__
+     - :doc:`How to use <howto/operator/google/cloud/cloud_memorystore_memcached>`
      - :mod:`airflow.providers.google.cloud.hooks.cloud_memorystore`
      - :mod:`airflow.providers.google.cloud.operators.cloud_memorystore`
      -
@@ -930,9 +964,13 @@ These integrations allow you to copy data from/to Google Cloud.
 
    * - `Amazon Simple Storage Service (S3) <https://aws.amazon.com/s3/>`__
      - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
-     - :doc:`How to use <howto/operator/google/cloud/cloud_storage_transfer_service>`
-     - :mod:`airflow.providers.google.cloud.transfers.s3_to_gcs`,
-       :mod:`airflow.providers.google.cloud.operators.cloud_storage_transfer_service`
+     - :doc:`How to use <howto/operator/google/transfer/s3_to_gcs>`
+     - :mod:`airflow.providers.google.cloud.transfers.s3_to_gcs`
+
+   * - `Amazon Glacier <https://aws.amazon.com/glacier/>`__
+     - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
+     - :doc:`How to use <howto/operator/amazon/aws/transfer/glacier_to_gcs>`
+     - :mod:`airflow.providers.amazon.aws.transfers.glacier_to_gcs`,
 
    * - `Apache Cassandra <http://cassandra.apache.org/>`__
      - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
@@ -944,10 +982,20 @@ These integrations allow you to copy data from/to Google Cloud.
      -
      - :mod:`airflow.providers.google.cloud.transfers.adls_to_gcs`
 
+   * - `Azure FileShare <https://cloud.google.com/storage/>`__
+     - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
+     - :doc:`How to use <howto/operator/google/transfer/azure_fileshare_to_gcs>`
+     - :mod:`airflow.providers.google.cloud.transfers.azure_fileshare_to_gcs`
+
    * - `Facebook Ads <http://business.facebook.com>`__
      - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
      - :doc:`How to use <howto/operator/google/transfer/facebook_ads_to_gcs>`
      - :mod:`airflow.providers.google.cloud.transfers.facebook_ads_to_gcs`
+
+   * - `Salesforce <https://www.salesforce.com/>`__
+     - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
+     - :doc:`How to use <howto/operator/google/transfer/salesforce_to_gcs>`
+     - :mod:`airflow.providers.google.cloud.transfers.salesforce_to_gcs`
 
 
    * - `Google Ads <https://ads.google.com/>`__
@@ -1019,10 +1067,10 @@ These integrations allow you to copy data from/to Google Cloud.
 
    * - `MySQL <https://www.mysql.com/>`__
      - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
-     -
+     - :doc:`How to use <howto/operator/google/transfer/mysql_to_gcs>`
      - :mod:`airflow.providers.google.cloud.transfers.mysql_to_gcs`
 
-   * - `PostgresSQL <https://www.postgresql.org/>`__
+   * - `PostgreSQL <https://www.postgresql.org/>`__
      - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
      -
      - :mod:`airflow.providers.google.cloud.transfers.postgres_to_gcs`
@@ -1220,7 +1268,7 @@ These integrations allow you to perform various operations within various servic
      - :mod:`airflow.providers.jira.sensors.jira`
 
    * - `Databricks <https://databricks.com/>`__
-     -
+     - :doc:`How to use <howto/operator/databricks>`
      - :mod:`airflow.providers.databricks.hooks.databricks`
      - :mod:`airflow.providers.databricks.operators.databricks`
      -
@@ -1267,6 +1315,12 @@ These integrations allow you to perform various operations within various servic
      - :mod:`airflow.providers.jenkins.operators.jenkins_job_trigger`
      -
 
+   * - `MySql <https://www.mysql.com/>`__
+     - :doc:`How to use <howto/operator/mysql>`
+     - :mod:`airflow.providers.snowflake.hooks.mysql`
+     - :mod:`airflow.providers.snowflake.operators.mysql`
+     -
+
    * - `Opsgenie <https://www.opsgenie.com/>`__
      -
      - :mod:`airflow.providers.opsgenie.hooks.opsgenie_alert`
@@ -1309,7 +1363,7 @@ These integrations allow you to perform various operations within various servic
      -
 
    * - `Snowflake <https://www.snowflake.com/>`__
-     -
+     - :doc:`How to use <howto/operator/snowflake>`
      - :mod:`airflow.providers.snowflake.hooks.snowflake`
      - :mod:`airflow.providers.snowflake.operators.snowflake`,
        :mod:`airflow.providers.snowflake.transfers.snowflake_to_slack`
@@ -1459,7 +1513,7 @@ These integrations allow you to perform various operations using various softwar
      - :mod:`airflow.providers.papermill.operators.papermill`
      -
 
-   * - `PostgresSQL <https://www.postgresql.org/>`__
+   * - `PostgreSQL <https://www.postgresql.org/>`__
      -
      - :mod:`airflow.providers.postgres.hooks.postgres`
      - :mod:`airflow.providers.postgres.operators.postgres`
@@ -1555,7 +1609,7 @@ These integrations allow you to copy data.
      -
      - :mod:`airflow.providers.oracle.transfers.oracle_to_oracle`
 
-   * - `PostgresSQL <https://www.postgresql.org/>`__
+   * - `PostgreSQL <https://www.postgresql.org/>`__
      - `Google Cloud Storage (GCS) <https://cloud.google.com/gcs/>`__
      -
      - :mod:`airflow.providers.google.cloud.transfers.postgres_to_gcs`
@@ -1619,7 +1673,7 @@ communication protocols or interface.
      - :mod:`airflow.providers.imap.sensors.imap_attachment`
 
    * - `Java Database Connectivity (JDBC) <https://docs.oracle.com/javase/8/docs/technotes/guides/jdbc/>`__
-     -
+     - :doc:`How to use <howto/operator/jdbc>`
      - :mod:`airflow.providers.jdbc.hooks.jdbc`
      - :mod:`airflow.providers.jdbc.operators.jdbc`
      -

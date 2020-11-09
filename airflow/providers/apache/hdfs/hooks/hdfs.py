@@ -62,9 +62,7 @@ class HDFSHook(BaseHook):
         self.autoconfig = autoconfig
 
     def get_conn(self) -> Any:
-        """
-        Returns a snakebite HDFSClient object.
-        """
+        """Returns a snakebite HDFSClient object."""
         # When using HAClient, proxy_user must be the same, so is ok to always
         # take the first.
         effective_user = self.proxy_user
@@ -103,8 +101,6 @@ class HDFSHook(BaseHook):
                 hdfs_namenode_principal=hdfs_namenode_principal,
             )
         else:
-            raise HDFSHookException(
-                "conn_id doesn't exist in the repository " "and autoconfig is not specified"
-            )
+            raise HDFSHookException("conn_id doesn't exist in the repository and autoconfig is not specified")
 
         return client

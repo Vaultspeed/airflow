@@ -21,9 +21,10 @@ from connexion import FlaskApi, ProblemException, problem
 
 from airflow import version
 
-doc_link = f'https://airflow.apache.org/docs/{version.version}/stable-rest-api-ref.html'
-if 'dev' in version.version:
+if any(suffix in version.version for suffix in ['dev', 'a', 'b']):
     doc_link = "https://airflow.readthedocs.io/en/latest/stable-rest-api-ref.html"
+else:
+    doc_link = f'https://airflow.apache.org/docs/{version.version}/stable-rest-api-ref.html'
 
 EXCEPTIONS_LINK_MAP = {
     400: f"{doc_link}#section/Errors/BadRequest",
@@ -38,11 +39,12 @@ EXCEPTIONS_LINK_MAP = {
 def common_error_handler(exception):
     """
     Used to capture connexion exceptions and add link to the type field
+
     :type exception: Exception
     """
     if isinstance(exception, ProblemException):
 
-        link = EXCEPTIONS_LINK_MAP.get(exception.status, None)
+        link = EXCEPTIONS_LINK_MAP.get(exception.status)
         if link:
             response = problem(
                 status=exception.status,
@@ -78,7 +80,7 @@ class NotFound(ProblemException):
     def __init__(
         self, title: str = 'Not Found', detail: Optional[str] = None, headers: Optional[Dict] = None, **kwargs
     ):
-        super(NotFound, self).__init__(
+        super().__init__(
             status=404, type=EXCEPTIONS_LINK_MAP[404], title=title, detail=detail, headers=headers, **kwargs
         )
 
@@ -93,7 +95,7 @@ class BadRequest(ProblemException):
         headers: Optional[Dict] = None,
         **kwargs,
     ):
-        super(BadRequest, self).__init__(
+        super().__init__(
             status=400, type=EXCEPTIONS_LINK_MAP[400], title=title, detail=detail, headers=headers, **kwargs
         )
 
@@ -108,7 +110,7 @@ class Unauthenticated(ProblemException):
         headers: Optional[Dict] = None,
         **kwargs,
     ):
-        super(Unauthenticated, self).__init__(
+        super().__init__(
             status=401, type=EXCEPTIONS_LINK_MAP[401], title=title, detail=detail, headers=headers, **kwargs
         )
 
@@ -119,7 +121,7 @@ class PermissionDenied(ProblemException):
     def __init__(
         self, title: str = 'Forbidden', detail: Optional[str] = None, headers: Optional[Dict] = None, **kwargs
     ):
-        super(PermissionDenied, self).__init__(
+        super().__init__(
             status=403, type=EXCEPTIONS_LINK_MAP[403], title=title, detail=detail, headers=headers, **kwargs
         )
 
@@ -130,7 +132,7 @@ class AlreadyExists(ProblemException):
     def __init__(
         self, title='Conflict', detail: Optional[str] = None, headers: Optional[Dict] = None, **kwargs
     ):
-        super(AlreadyExists, self).__init__(
+        super().__init__(
             status=409, type=EXCEPTIONS_LINK_MAP[409], title=title, detail=detail, headers=headers, **kwargs
         )
 
@@ -145,6 +147,6 @@ class Unknown(ProblemException):
         headers: Optional[Dict] = None,
         **kwargs,
     ):
-        super(Unknown, self).__init__(
+        super().__init__(
             status=500, type=EXCEPTIONS_LINK_MAP[500], title=title, detail=detail, headers=headers, **kwargs
         )

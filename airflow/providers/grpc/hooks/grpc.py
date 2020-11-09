@@ -72,7 +72,8 @@ class GrpcHook(BaseHook):
             channel = grpc.insecure_channel(base_url)
         elif auth_type in {"SSL", "TLS"}:
             credential_file_name = self._get_field("credential_pem_file")
-            creds = grpc.ssl_channel_credentials(open(credential_file_name).read())
+            with open(credential_file_name, "rb") as credential_file:
+                creds = grpc.ssl_channel_credentials(credential_file.read())
             channel = grpc.secure_channel(base_url, creds)
         elif auth_type == "JWT_GOOGLE":
             credentials, _ = google_auth.default()
@@ -105,9 +106,7 @@ class GrpcHook(BaseHook):
     def run(
         self, stub_class: Callable, call_func: str, streaming: bool = False, data: Optional[dict] = None
     ) -> Generator:
-        """
-        Call gRPC function and yield response to caller
-        """
+        """Call gRPC function and yield response to caller"""
         if data is None:
             data = {}
         with self.get_conn() as channel:
@@ -137,5 +136,5 @@ class GrpcHook(BaseHook):
         to the hook page, which allow admins to specify scopes, credential pem files, etc.
         They get formatted as shown below.
         """
-        full_field_name = 'extra__grpc__{}'.format(field_name)
+        full_field_name = f'extra__grpc__{field_name}'
         return self.extras[full_field_name]

@@ -15,9 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""
-Interact with AWS Redshift, using the boto3 library.
-"""
+"""Interact with AWS Redshift, using the boto3 library."""
 
 from typing import List, Optional
 
@@ -35,8 +33,9 @@ class RedshiftHook(AwsBaseHook):
         :class:`~airflow.providers.amazon.aws.hooks.base_aws.AwsBaseHook`
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(client_type='redshift', *args, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs["client_type"] = "redshift"
+        super().__init__(*args, **kwargs)
 
     # TODO: Wrap create_cluster_snapshot
     def cluster_status(self, cluster_identifier: str) -> str:

@@ -28,7 +28,7 @@ Before you begin
 
 Before you start, make sure you have performed the following tasks:
 
-1.  Include sendgrid subpackage as part of your Airflow installation
+1.  Include ``google`` subpackage as part of your Airflow installation
 
     .. code-block:: bash
 
@@ -116,11 +116,13 @@ The name of the secret must fit the following formats:
 
  * for connection: ``[variable_prefix][sep][connection_name]``
  * for variable: ``[connections_prefix][sep][variable_name]``
+ * for Airflow config: ``[config_prefix][sep][config_name]``
 
 where:
 
  * ``connections_prefix`` - fixed value defined in the ``connections_prefix`` parameter in backend configuration. Default: ``airflow-connections``.
  * ``variable_prefix`` - fixed value defined in the ``variable_prefix`` parameter in backend configuration. Default: ``airflow-variables``.
+ * ``config_prefix`` - fixed value defined in the ``config_prefix`` parameter in backend configuration. Default: ``airflow-config``.
  * ``sep`` - fixed value defined in the ``sep`` parameter in backend configuration. Default: ``-``.
 
 The Cloud Secrets Manager secret name should follow the pattern ``^[a-zA-Z0-9-_]*$``.
@@ -150,7 +152,7 @@ command as in the example below.
     Created version [1] of the secret [airflow-variables-first-variable].
 
 Checking configuration
-======================
+""""""""""""""""""""""
 
 You can use the ``airflow connections get`` command to check if the connection is correctly read from the backend secret:
 
@@ -178,7 +180,7 @@ To check the variables is correctly read from the backend secret, you can use ``
     secret_content
 
 Clean up
-========
+""""""""
 
 To avoid incurring charges to your Google Cloud account for the resources used in this guide,
 delete secrets by running ``gcloud beta secrets delete``:

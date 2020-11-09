@@ -186,7 +186,10 @@ dmypy.json
 /.kube
 /.inputrc
 log.txt*
-/backport_packages/CHANGELOG.txt
+
+# Provider-related ignores
+/provider_packages/CHANGELOG.txt
+/airflow/providers/__init__.py
 
 # Local .terraform directories
 **/.terraform/*
@@ -205,3 +208,5 @@ Chart.lock
 
 # Might be generated when you build wheels
 pip-wheel-metadata
+
+.pypirc
